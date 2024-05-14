@@ -14,7 +14,7 @@ export default defineConfig({
     },
     proxy: {
       '^/api': {
-        target: 'http://api',
+        target: 'http://my-flask-backend:5000',
         changeOrigin: true
       }
     }

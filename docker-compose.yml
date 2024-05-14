@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  backend:
+    container_name: my-flask-backend
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+    networks:
+      - my_network
+
+  frontend:
+    container_name: my-react-frontend
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_HOST=0.0.0.0
+      - VITE_PORT=5173
+    depends_on:
+      - backend
+    networks:
+      - my_network
+ 
+networks:
+  my_network:
