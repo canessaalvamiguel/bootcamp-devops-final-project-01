@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-frontend/avatares-devops-frontend:lasted
+        image: us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-frontend/avatares-devops-frontend:lastest
         resources:
           limits:
             memory: "500Mi"
