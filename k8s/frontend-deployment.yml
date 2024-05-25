@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-frontend/avatares-devops-frontend
+        resources:
+          limits:
+            memory: "500Mi"
+            cpu: "100m"
+        ports:
+        - containerPort: 5173
+        env:
+        - name: VITE_HOST
+          value: "0.0.0.0"
+        - name: VITE_PORT
+          value: "5173"
