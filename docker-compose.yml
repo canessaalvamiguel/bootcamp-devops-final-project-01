@@ -24,6 +24,7 @@ services:
     environment:
       - VITE_HOST=0.0.0.0
       - VITE_PORT=5173
+      - BACKEND_URL=http://my-flask-backend:5000
     depends_on:
       - backend
     networks:
