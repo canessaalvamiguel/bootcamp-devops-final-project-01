@@ -4,11 +4,10 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm install && npm cache clean --force
 
 COPY . .
 
-RUN rm -rf node_modules/.vite/
 RUN npm run build
 
 EXPOSE 4173
