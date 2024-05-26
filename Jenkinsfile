@@ -6,7 +6,7 @@ pipeline {
 
    environment {
       GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-deployer')
-      KUBECONFIG = credentials('kubeconfig')
+      //KUBECONFIG = credentials('kubeconfig')
       PROJECT_ID = 'level-ward-423317-j3'
       GITHUB_REPO = 'https://github.com/canessaalvamiguel/bootcamp-devops-final-project-01.git'
       DOCKER_IMAGE_NAME = 'avatares-devops-frontend'
@@ -34,31 +34,58 @@ pipeline {
     }
     stage('Build Docker Images') {
       steps {
-          sh 'docker build -t avatares-devops-frontend ./web -f ./web/Dockerfile'
-          sh 'docker build -t avatares-devops-backend ./api -f ./api/Dockerfile'
+          sh 'docker build -t avatares-devops-frontend:latest ./web -f ./web/Dockerfile'
+          sh 'docker build -t avatares-devops-backend:latest ./api -f ./api/Dockerfile'
       }
     }
     stage('Tag Docker Images') {
       steps {
           sh "docker tag avatares-devops-frontend:latest avatares-devops-frontend:${VERSION}"          
-          sh "docker tag avatares-devops-frontend:${VERSION} us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-frontend/avatares-devops-frontend:${VERSION}"
+          sh "docker tag avatares-devops-frontend:${VERSION} us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-frontend/avatares-devops-frontend:latest"          
           sh "docker tag avatares-devops-backend:latest avatares-devops-backend:${VERSION}"       
-          sh "docker tag avatares-devops-backend:${VERSION} us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-backend/avatares-devops-backend:${VERSION}"
+          sh "docker tag avatares-devops-backend:${VERSION} us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-backend/avatares-devops-backend:latest"
       }
     }
     stage('Push images') {
       steps {
           sh "gcloud auth configure-docker us-west1-docker.pkg.dev"
-          sh "docker push us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-backend/avatares-devops-backend:${VERSION}"
-          sh "docker push us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-frontend/avatares-devops-frontend:${VERSION}"        
+          sh "docker push us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-backend/avatares-devops-backend:latest"
+          sh "docker push us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-frontend/avatares-devops-frontend:latest"        
       }
     }
-    stage('Deploy to GKE') {
+    /*stage('Deploy to GKE') {
       steps {
           script {
               sh "kubectl --kubeconfig=${KUBECONFIG} apply -f ${DEPLOYMENT_FILE_FRONTEND}"
               sh "kubectl --kubeconfig=${KUBECONFIG} apply -f ${DEPLOYMENT_FILE_BACKEND}"
+              //sh "kubectl set image deployment/frontend-deployment frontend=us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-frontend/avatares-devops-frontend:${VERSION}"
           }
+      }
+    }*/
+    stage('Deploy frontend to kubernetes'){
+      steps{
+          step([
+            $class: 'KubernetesEngineBuilder', 
+            projectId: env.PROJECT_ID, 
+            clusterName: 'lab-cluster', 
+            location: 'us-west1-c', 
+            manifestPattern: 'k8s/frontend-deployment.yml', 
+            credentialsId: 'sa-kubectl',
+            verifyDeployments: true])
+		   echo "Deployment Finished ..."
+      }
+    }
+    stage('Deploy backend to kubernetes'){
+      steps{
+          step([
+            $class: 'KubernetesEngineBuilder', 
+            projectId: env.PROJECT_ID, 
+            clusterName: 'lab-cluster', 
+            location: 'us-west1-c', 
+            manifestPattern: 'k8s/backend-deployment.yml', 
+            credentialsId: 'sa-kubectl',
+            verifyDeployments: true])
+		   echo "Deployment Finished ..."
       }
     }
   }
