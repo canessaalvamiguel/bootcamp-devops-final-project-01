@@ -34,8 +34,8 @@ pipeline {
     }
     stage('Build Docker Images') {
       steps {
-          sh 'docker build -t avatares-devops-frontend:latest ./web -f ./web/Dockerfile'
-          sh 'docker build -t avatares-devops-backend:latest ./api -f ./api/Dockerfile'
+          sh 'docker build -t avatares-devops-frontend:latest ./web -f ./web/Dockerfile --network=host'
+          sh 'docker build -t avatares-devops-backend:latest ./api -f ./api/Dockerfile --network=host'
       }
     }
     stage('Tag Docker Images') {
