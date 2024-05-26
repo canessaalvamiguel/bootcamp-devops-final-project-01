@@ -20,10 +20,10 @@ services:
       context: ./web
       dockerfile: Dockerfile
     ports:
-      - "5173:5173"
+      - "4173:4173"
     environment:
       - VITE_HOST=0.0.0.0
-      - VITE_PORT=5173
+      - VITE_PORT=4173
       - BACKEND_URL=http://my-flask-backend:5000
     depends_on:
       - backend
