@@ -79,7 +79,7 @@ pipeline {
             clusterName: env.CLUSTER_NAME, 
             location: env.CLUSTER_LOCATION, 
             manifestPattern: env.DEPLOYMENT_FILE_FRONTEND, 
-            credentialsId: 'sa-kubectl',
+            credentialsId: env.CREDENTIALS_KUBE_PLUGIN_ID,
             verifyDeployments: true])
 		   echo "Deployment to frontend Finished ..."
       }
@@ -92,7 +92,7 @@ pipeline {
             clusterName: env.CLUSTER_NAME, 
             location: env.CLUSTER_LOCATION, 
             manifestPattern: env.DEPLOYMENT_FILE_BACKEND, 
-            credentialsId: en.CREDENTIALS_KUBE_PLUGIN_ID,
+            credentialsId: env.CREDENTIALS_KUBE_PLUGIN_ID,
             verifyDeployments: true])
 		   echo "Deployment to backend Finished ..."
       }
