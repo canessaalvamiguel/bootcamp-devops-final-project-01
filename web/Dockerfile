@@ -8,6 +8,7 @@ RUN npm install
 
 COPY . .
 
+RUN rm -rf node_modules/.vite/
 RUN npm run build
 
 EXPOSE 4173
