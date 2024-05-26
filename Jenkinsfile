@@ -41,16 +41,16 @@ pipeline {
     stage('Tag Docker Images') {
       steps {
           sh "docker tag avatares-devops-frontend:latest avatares-devops-frontend:${VERSION}"          
-          sh "docker tag avatares-devops-frontend:${VERSION} us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-frontend/avatares-devops-frontend:latest"          
+          sh "docker tag avatares-devops-frontend:${VERSION} us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-frontend/avatares-devops-frontend:${VERSION}"          
           sh "docker tag avatares-devops-backend:latest avatares-devops-backend:${VERSION}"       
-          sh "docker tag avatares-devops-backend:${VERSION} us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-backend/avatares-devops-backend:latest"
+          sh "docker tag avatares-devops-backend:${VERSION} us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-backend/avatares-devops-backend:${VERSION}"
       }
     }
     stage('Push images') {
       steps {
           sh "gcloud auth configure-docker us-west1-docker.pkg.dev"
-          sh "docker push us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-backend/avatares-devops-backend:latest"
-          sh "docker push us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-frontend/avatares-devops-frontend:latest"        
+          sh "docker push us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-backend/avatares-devops-backend:${VERSION}"
+          sh "docker push us-west1-docker.pkg.dev/level-ward-423317-j3/avatares-devops-frontend/avatares-devops-frontend:${VERSION}"        
       }
     }
     /*stage('Deploy to GKE') {
@@ -62,6 +62,22 @@ pipeline {
           }
       }
     }*/
+    stage('Update Deployment YAML') {
+      steps {
+          script {
+              sh "sed -i 's|PLACEHOLDER_IMAGE_VERSION|${VERSION}|g' ${DEPLOYMENT_FILE_FRONTEND}"
+              sh "sed -i 's|PLACEHOLDER_IMAGE_VERSION|${VERSION}|g' ${DEPLOYMENT_FILE_BACKEND}"
+          }
+      }
+    }
+    stage('Validate Deployment YAML') {
+      steps {
+          script {
+              sh "cat ${DEPLOYMENT_FILE_FRONTEND}"
+              sh "cat ${DEPLOYMENT_FILE_BACKEND}"
+          }
+      }
+    }
     stage('Deploy frontend to kubernetes'){
       steps{
           step([
