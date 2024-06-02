@@ -8,6 +8,8 @@ pipeline {
       VERSION = "${env.BUILD_NUMBER}"
       DEPLOYMENT_FILE_FRONTEND = 'k8s/frontend-deployment.yml'
       DEPLOYMENT_FILE_BACKEND  = 'k8s/backend-deployment.yml'
+      SERVICE_FILE_FRONTEND = 'k8s/frontend-service.yml'
+      SERVICE_FILE_BACKEND = 'k8s/backend-service.yml'
       CLUSTER_NAME = 'lab-cluster'
       CLUSTER_LOCATION = 'us-west1-c'
       CLUSTER_LOCATION_REGISTRY = 'us-west1-docker'
@@ -84,6 +86,19 @@ pipeline {
 		   echo "Deployment to frontend Finished ..."
       }
     }
+    stage('Deploy backend service to kubernetes'){
+      steps{
+          step([
+            $class: 'KubernetesEngineBuilder', 
+            projectId: env.PROJECT_ID, 
+            clusterName: env.CLUSTER_NAME, 
+            location: env.CLUSTER_LOCATION, 
+            manifestPattern: env.SERVICE_FILE_BACKEND, 
+            credentialsId: env.CREDENTIALS_KUBE_PLUGIN_ID,
+            verifyDeployments: true])
+		   echo "Deployment to backend service Finished ..."
+      }
+    }
     stage('Deploy backend to kubernetes'){
       steps{
           step([
@@ -95,6 +110,19 @@ pipeline {
             credentialsId: env.CREDENTIALS_KUBE_PLUGIN_ID,
             verifyDeployments: true])
 		   echo "Deployment to backend Finished ..."
+      }
+    }
+    stage('Deploy frontend service to kubernetes'){
+      steps{
+          step([
+            $class: 'KubernetesEngineBuilder', 
+            projectId: env.PROJECT_ID, 
+            clusterName: env.CLUSTER_NAME, 
+            location: env.CLUSTER_LOCATION, 
+            manifestPattern: env.SERVICE_FILE_FRONTEND, 
+            credentialsId: env.CREDENTIALS_KUBE_PLUGIN_ID,
+            verifyDeployments: true])
+		   echo "Deployment to frontend service Finished ..."
       }
     }
   }
