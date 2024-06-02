@@ -8,6 +8,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
+      - "9100:9100"
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=development
@@ -29,6 +30,27 @@ services:
       - backend
     networks:
       - my_network
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.33.5
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - my_network
+  
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:11.0.0
+    ports:
+      - "3000:3000"
+    networks:
+      - my_network
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
  
 networks:
   my_network:

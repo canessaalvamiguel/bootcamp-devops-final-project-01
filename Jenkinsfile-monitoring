@@ -1,0 +1,100 @@
+pipeline {
+
+  agent any
+
+   environment {
+      GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-deployer')
+      PROJECT_ID = 'level-ward-423317-j3'
+      DEPLOYMENT_PROMETHEUS_DEPLOYMENT = 'k8s/prometheus-deployment.yml'
+      DEPLOYMENT_PROMETHEUS_SERVICE = 'k8s/prometheus-service.yml'
+      DEPLOYMENT_PROMETHEUS_CONFIGMAP = 'k8s/prometheus-configmap.yml'
+      DEPLOYMENT_GRAFANA_SERVICE  = 'k8s/grafana-service.yml'
+      DEPLOYMENT_GRAFANA_DEPLOYMENT  = 'k8s/grafana-deployment.yml'
+      CLUSTER_NAME = 'lab-cluster'
+      CLUSTER_LOCATION = 'us-west1-c'
+      CREDENTIALS_KUBE_PLUGIN_ID = 'sa-kubectl'
+  }
+
+  stages {
+    stage('Check gcloud installation') {
+      steps {
+        sh 'gcloud version'
+      }
+    }
+    stage('Authenticate to GCP') {
+      steps {
+          script {
+              withCredentials([file(credentialsId: 'gcp-deployer', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                  sh 'gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS'
+                  sh 'gcloud config set project $PROJECT_ID'
+              }
+          }
+      }
+    }
+    stage('Deploy prometheus configmap'){
+      steps{
+          step([
+            $class: 'KubernetesEngineBuilder', 
+            projectId: env.PROJECT_ID, 
+            clusterName: env.CLUSTER_NAME, 
+            location: env.CLUSTER_LOCATION, 
+            manifestPattern: env.DEPLOYMENT_PROMETHEUS_CONFIGMAP, 
+            credentialsId: env.CREDENTIALS_KUBE_PLUGIN_ID,
+            verifyDeployments: true])
+		   echo "Deployment to prometheus configmap Finished ..."
+      }
+    }
+    stage('Deploy prometheus deployment'){
+      steps{
+          step([
+            $class: 'KubernetesEngineBuilder', 
+            projectId: env.PROJECT_ID, 
+            clusterName: env.CLUSTER_NAME, 
+            location: env.CLUSTER_LOCATION, 
+            manifestPattern: env.DEPLOYMENT_PROMETHEUS_DEPLOYMENT, 
+            credentialsId: env.CREDENTIALS_KUBE_PLUGIN_ID,
+            verifyDeployments: true])
+		   echo "Deployment to prometheus deployment Finished ..."
+      }
+    }
+    stage('Deploy prometheus service'){
+      steps{
+          step([
+            $class: 'KubernetesEngineBuilder', 
+            projectId: env.PROJECT_ID, 
+            clusterName: env.CLUSTER_NAME, 
+            location: env.CLUSTER_LOCATION, 
+            manifestPattern: env.DEPLOYMENT_PROMETHEUS_SERVICE, 
+            credentialsId: env.CREDENTIALS_KUBE_PLUGIN_ID,
+            verifyDeployments: true])
+		   echo "Deployment to prometheus service Finished ..."
+      }
+    }
+    stage('Deploy grafana deployment'){
+      steps{
+          step([
+            $class: 'KubernetesEngineBuilder', 
+            projectId: env.PROJECT_ID, 
+            clusterName: env.CLUSTER_NAME, 
+            location: env.CLUSTER_LOCATION, 
+            manifestPattern: env.DEPLOYMENT_GRAFANA_DEPLOYMENT, 
+            credentialsId: env.CREDENTIALS_KUBE_PLUGIN_ID,
+            verifyDeployments: true])
+		   echo "Deployment to grafana deployment Finished ..."
+      }
+    }
+    stage('Deploy grafana service'){
+      steps{
+          step([
+            $class: 'KubernetesEngineBuilder', 
+            projectId: env.PROJECT_ID, 
+            clusterName: env.CLUSTER_NAME, 
+            location: env.CLUSTER_LOCATION, 
+            manifestPattern: env.DEPLOYMENT_GRAFANA_SERVICE, 
+            credentialsId: env.CREDENTIALS_KUBE_PLUGIN_ID,
+            verifyDeployments: true])
+		   echo "Deployment to grafana service Finished ..."
+      }
+    }
+  }
+}
